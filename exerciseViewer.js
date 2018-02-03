@@ -31,7 +31,7 @@ const exercises = [
   { name: "Push-ups" },
   { name: "Squats" },
   { name: "Calf-raises" },
-  { name: "Hyperextensions" },
+  // { name: "Hyperextensions" },
   { name: "Leg raises" },
   { name: "Planks" },
   { name: "Burpees" },
