@@ -19,8 +19,14 @@ import NotificationHandler from "./notificationHandler";
 export default class App extends React.Component {
 
   state = {
-    appState: AppState.currentState,
+    appState: "active",
     notificationHandler: new NotificationHandler()
+  }
+  
+  constructor(props) {
+    super(props);
+    
+    this.onAppStateChange = this.onAppStateChange.bind(this);
   }
   
   async registerForPushNotificationsAsync() {
@@ -47,18 +53,20 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    AppState.addEventListener('change', this.handleAppStateChange);
+    AppState.addEventListener('change', this.onAppStateChange);
 
     this.state.notificationHandler.setUpNotifications();
   }
 
   componentWillUnmount() {
-    AppState.removeEventListener('change', this.handleAppStateChange);
+    AppState.removeEventListener('change', this.onAppStateChange);
   }
 
   onAppStateChange(nextAppState) {
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-      console.log('App has come to the foreground!')
+    if (this.state.appState.match(/inactive|background/) && nextAppState === "active") {
+      console.log('App has come to the foreground!');
+
+      this.exerciseViewerRef.updateExercise();
     }
     this.state.appState = nextAppState;
   }
@@ -68,7 +76,9 @@ export default class App extends React.Component {
       <View
         style={{flex: 1.0}}
       >
-        <ExerciseViewer />
+        <ExerciseViewer
+          ref={(ref) => {this.exerciseViewerRef = ref; }}
+        />
       </View>
     );
   }
