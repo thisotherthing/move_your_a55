@@ -37,17 +37,18 @@ export default class NotificationHandler {
   }
 
   async setUpNotifications() {
-    this.state.notificationsAllowed = await this.registerForPushNotificationsAsync();
+    // cancel previous notifications
+    Notifications.cancelAllScheduledNotificationsAsync();
 
-    console.log(this.state.notificationsAllowed);
+    this.state.notificationsAllowed = await this.registerForPushNotificationsAsync();
 
     if (!this.state.notificationsAllowed) {
       return;
     }
 
     const localNotification = {
-      title: "test t",
-      body: "test body", // (string) — body text of the notification.
+      title: "MOVE",
+      body: "YOUR ASS", // (string) — body text of the notification.
       data: {"foo": "foobar"},
       ios: { // (optional) (object) — notification configuration specific to iOS.
         sound: false // (optional) (boolean) — if true, play a sound. Default: false.
@@ -65,29 +66,34 @@ export default class NotificationHandler {
     };
 
     let t = new Date();
-    t.setSeconds(t.getSeconds() + 10);
 
+    t.setHours(t.getHours() + 1 - (t.getTimezoneOffset() / 60));
 
-    console.log(t.toUTCString());
+    // skip to 9:00 in the morning, if it's evening
+    if (t.getHours() > 18) {
+      t.setDate(t.getDate() + 1);
+      t.setHours(9 - (t.getTimezoneOffset() / 60));
+      t.setMinutes(0);
+    }
+
+    // console.log(t.toUTCString());
 
     const schedulingOptions = {
       time: t, // (date or number) — A Date object representing when to fire the notification or a number in Unix epoch time. Example: (new Date()).getTime() + 1000 is one second from now.
       // repeat: false
     };
 
-    Notifications.addListener(({ origin, data }) => {
-      console.info(`Notification (${origin})  with data: ${JSON.stringify(data)}`);
-    });
+    // Notifications.addListener(({ origin, data }) => {
+      // console.info(`Notification (${origin})  with data: ${JSON.stringify(data)}`);
+    // });
 
     Notifications
       .scheduleLocalNotificationAsync(localNotification, schedulingOptions)
       .then((id) => {
-        console.log("Success " + id);
+        // console.log("Success " + id);
       })
       .catch((e) => {
           console.log(`Failure (${e})`)
       });
-
-    // Notifications.cancelAllScheduledNotificationsAsync();
   }
 }
