@@ -2,12 +2,18 @@ import React from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  Dimensions
 } from 'react-native';
 
 import {
-  Video
+  Video,
+  Font
 } from "expo";
+
+import {
+  GIPHY_API_KEY
+} from "./api_keys"
 
 const exercises = [
   { name: "Lunges" },
@@ -25,25 +31,20 @@ const exercises = [
   { name: "Sprinting" },
 ];
 
-const key = "gw9qzUQAqXgvEFIV0ZARU4iZMrXaLw0y";
-
 export default class ExerciseViewer extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      exerciseName: "",
-      videoUrl: ""
-    };
-  }
+  state = {
+    exerciseName: "",
+    videoUrl: "",
+    fontLoaded: false
+  };
 
   updateExercise() {
     const exerciseIndex = Math.floor((Math.random() * exercises.length));
 
     const requestUrl = `
       https://api.giphy.com/v1/gifs/search?
-      api_key=${key}&
+      api_key=${GIPHY_API_KEY}&
       q=${exercises[exerciseIndex].name.replace(/\ /g, "+")}&
       limit=1&
       offset=0&rating=PG-13&lang=en
@@ -62,14 +63,24 @@ export default class ExerciseViewer extends React.Component {
     });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.updateExercise();
+
+    await Font.loadAsync({
+      'PassionOne-Black': require('./assets/fonts/PassionOne-Black.ttf'),
+    });
+
+    this.setState({fontLoaded: true});
   }
 
   render() {
     return (
       <View
-        style={{flex: 1.0}}
+        style={{
+          flex: 1.0,
+          justifyContent: "center",
+          alignItems: "center"
+        }}
       >
         {this.state.videoUrl.length > 0 && <View style={styles.videoWrapper}>
           <Video 
@@ -83,12 +94,13 @@ export default class ExerciseViewer extends React.Component {
             style={{flex: 1.0}}
           />
         </View>}
-        <Text
+        {this.state.fontLoaded && <Text
           style={{
             color: "white",
-            marginTop: 100
+            fontSize: 120,
+            fontFamily: "PassionOne-Black"
           }}
-        >{this.state.exerciseName}</Text>
+        >{`10 ${this.state.exerciseName.toUpperCase()}`}</Text>}
       </View>
     );
   }
