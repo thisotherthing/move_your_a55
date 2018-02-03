@@ -3,13 +3,20 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions
+  Dimensions,
+  MaskedViewIOS
 } from 'react-native';
 
 import {
   Video,
   Font
 } from "expo";
+
+import {
+  map,
+  clamp,
+  getRandomInt
+} from "./littleMathLib";
 
 import {
   GIPHY_API_KEY
@@ -28,7 +35,7 @@ const exercises = [
   { name: "Leg raises" },
   { name: "Planks" },
   { name: "Burpees" },
-  { name: "Sprinting" },
+  // { name: "Sprinting" },
 ];
 
 export default class ExerciseViewer extends React.Component {
@@ -36,6 +43,7 @@ export default class ExerciseViewer extends React.Component {
   state = {
     exerciseName: "",
     videoUrl: "",
+    videoUrl2: "",
     fontLoaded: false
   };
 
@@ -46,7 +54,7 @@ export default class ExerciseViewer extends React.Component {
       https://api.giphy.com/v1/gifs/search?
       api_key=${GIPHY_API_KEY}&
       q=${exercises[exerciseIndex].name.replace(/\ /g, "+")}&
-      limit=1&
+      limit=2&
       offset=0&rating=PG-13&lang=en
     `.replace(/\ /g, "").replace(/\n/g, "");
 
@@ -55,7 +63,8 @@ export default class ExerciseViewer extends React.Component {
     .then((responseJson) => {
       this.setState({
         exerciseName: exercises[exerciseIndex].name,
-        videoUrl: responseJson.data[0].images.looping.mp4
+        videoUrl: responseJson.data[0].images.looping.mp4,
+        videoUrl: responseJson.data[1].images.looping.mp4
       });
     })
     .catch((error) => {
@@ -74,33 +83,65 @@ export default class ExerciseViewer extends React.Component {
   }
 
   render() {
+    const displayString = `${getRandomInt(5, 20)} ${this.state.exerciseName.toUpperCase()} NOW`;
+    let fontSize = map(
+      displayString.length,
+      13, 22,
+      160, 130
+    );
+
+    fontSize = clamp(120, 165, fontSize);
+
+    // console.log(displayString.length);
+
+    // 13 => 160
+    // 22 => 130
+
     return (
       <View
-        style={{
-          flex: 1.0,
-          justifyContent: "center",
-          alignItems: "center"
-        }}
+        style={{flex: 1.0}}
       >
-        {this.state.videoUrl.length > 0 && <View style={styles.videoWrapper}>
-          <Video 
-            source={{ uri: this.state.videoUrl}}
-            rate={1.0}
-            volume={1.0}
-            isMuted={true}
-            resizeMode={Video.RESIZE_MODE_COVER}
-            shouldPlay
-            isLooping
-            style={{flex: 1.0}}
-          />
-        </View>}
-        {this.state.fontLoaded && <Text
-          style={{
-            color: "white",
-            fontSize: 120,
-            fontFamily: "PassionOne-Black"
-          }}
-        >{`10 ${this.state.exerciseName.toUpperCase()}`}</Text>}
+        <MaskedViewIOS
+          style={{flex: 1.0}}
+          maskElement={
+            <View
+              style={{
+                flex: 1.0,
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+              {this.state.fontLoaded && <Text
+                style={{
+                  color: "white",
+                  fontSize,
+                  lineHeight: fontSize,
+                  fontFamily: "PassionOne-Black",
+                  // textAlign: "center",
+                  textAlign: "justify",
+                  padding: 20
+                }}
+              >{displayString.split('').join('\u200A')}</Text>}
+            </View>
+          }
+        >
+          {this.state.videoUrl.length > 0 && <View style={styles.videoWrapper}>
+            <Video 
+              source={{ uri: this.state.videoUrl}}
+              rate={1.0}
+              volume={1.0}
+              isMuted={true}
+              resizeMode={Video.RESIZE_MODE_COVER}
+              shouldPlay
+              isLooping
+              style={{flex: 1.0}}
+            />
+            {/* <View
+              style={{backgroundColor: "red", flex: 1.0}}
+            ></View> */}
+          </View>}
+        </MaskedViewIOS>
+        
       </View>
     );
   }
