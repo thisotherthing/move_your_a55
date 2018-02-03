@@ -1,5 +1,9 @@
 {
   "expo": {
+    "name": "Move your ass",
+    "icon": "./assets/icons/icon.png",
+    "version": "1.0.0",
+    "slug": "move-your-ass",
     "sdkVersion": "25.0.0"
   }
 }
